@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ElationDemoActivity</string>
+    <string name="config_hostname_default">elation-framework.com</string>
+    <string name="config_cobrand_default">elation</string>
+</resources>

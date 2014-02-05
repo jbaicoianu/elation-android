@@ -1,0 +1,13 @@
+Elation Demo App
+
+Shows off how to use various capabilities of the Elation webapp bridge
+
+Examples:
+- WebView usage
+  - events
+  - frame whole site
+  - snippets
+  - user auth
+  - component interaction
+  - debug logging
+- API usage
