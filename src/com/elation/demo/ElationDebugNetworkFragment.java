@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment {
   private ListView networkList;
   private ArrayAdapter networkListAdapter;
-  private ArrayList<Uri> networkEntries;
+  private ArrayList<NetworkRequest> networkEntries;
   
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -25,11 +25,11 @@ public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment
     if (networkListAdapter == null) {
       // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
       ElationWebView webview = ((ElationDemoActivity) getActivity()).getWebView();
-      networkEntries = webview.getUriList();
+      networkEntries = webview.getNetworkRequestList();
 
       networkListAdapter = new ElationDebugNetworkAdapter(getActivity(), R.layout.debug_network_message, networkEntries);
       
-      webview.setUriAdapter(networkListAdapter);
+      webview.setNetworkRequestAdapter(networkListAdapter);
     }
     networkList.setAdapter(networkListAdapter);
 

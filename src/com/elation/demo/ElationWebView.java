@@ -13,14 +13,18 @@ import android.util.AttributeSet;
 import android.net.Uri;
 import java.util.ArrayList;
 
+import android.app.Activity;
 
 public class ElationWebView extends WebView {
   private class ElationWebViewClient extends WebViewClient {
     private boolean first = true;
-    private ArrayAdapter uriAdapter;
-    private ArrayAdapter elationEventsAdapter;
     private ArrayList<ElationEvent> events = new ArrayList<ElationEvent>();
-    private ArrayList<Uri> uris = new ArrayList<Uri>();
+    private ArrayList<NetworkRequest> networkRequests = new ArrayList<NetworkRequest>();
+    private ArrayList<NetworkRequest> networkRequestsPending = new ArrayList<NetworkRequest>();
+
+    // FIXME - the WebViewClient should have no concept of adapters
+    private ArrayAdapter elationEventsAdapter;
+    private ArrayAdapter networkRequestAdapter;
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -29,9 +33,14 @@ public class ElationWebView extends WebView {
         ElationEvent event = new ElationEvent(uri);
         events.add(event);
 
-        // FIXME - the WebViewClient should have no concept of adapters, and this isn't thread safe!
+        // FIXME - the WebViewClient should have no concept of adapters or the UI thread
         if (elationEventsAdapter != null) {
-          elationEventsAdapter.notifyDataSetChanged();
+          ((Activity) view.getContext()).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              elationEventsAdapter.notifyDataSetChanged();
+            }
+          });
         }
         return true;
       }
@@ -39,14 +48,39 @@ public class ElationWebView extends WebView {
     }
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-      Uri uri = Uri.parse(url);
-      uris.add(uri);
+      NetworkRequest req = new NetworkRequest(url);
 
-      // FIXME - the WebViewClient should have no concept of adapters, and this isn't thread safe!
-      if (uriAdapter != null) {
-        uriAdapter.notifyDataSetChanged();
+      networkRequests.add(req);
+      networkRequestsPending.add(req);
+
+      // FIXME - the WebViewClient should have no concept of adapters or the UI thread
+      if (networkRequestAdapter != null) {
+        ((Activity) view.getContext()).runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            networkRequestAdapter.notifyDataSetChanged();
+          }
+        });
       }
-      return null;
+      WebResourceResponse foo = super.shouldInterceptRequest(view, url);
+      return foo;
+    }
+    @Override
+    public void onLoadResource(WebView view, String url) {
+      for (NetworkRequest req : networkRequestsPending) {
+        if (req.url.equals(url)) {
+          req.setFinished();
+
+          if (networkRequestAdapter != null) {
+            ((Activity) view.getContext()).runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                networkRequestAdapter.notifyDataSetChanged();
+              }
+            });
+          }
+        }
+      }
     }
 
     @Override
@@ -61,16 +95,16 @@ public class ElationWebView extends WebView {
     public ArrayList<ElationEvent> getElationEventsList() {
       return events;
     }
-    public ArrayList<Uri> getUriList() {
-      return uris;
+    public ArrayList<NetworkRequest> getNetworkRequestList() {
+      return networkRequests;
     }
 
     // FIXME - the WebViewClient should have no concept of adapters
     public void setElationEventsAdapter(ArrayAdapter nAdapter) {
       elationEventsAdapter = nAdapter;
     }
-    public void setUriAdapter(ArrayAdapter nAdapter) {
-      uriAdapter = nAdapter;
+    public void setNetworkRequestAdapter(ArrayAdapter nAdapter) {
+      networkRequestAdapter = nAdapter;
     }
   }
   private class ElationWebChromeClient extends WebChromeClient {
@@ -94,7 +128,7 @@ public class ElationWebView extends WebView {
     public boolean onConsoleMessage(ConsoleMessage cm) {
       logs.add(cm);
 
-      // FIXME - the WebChromeClient should have no concept of adapters, and this isn't thread safe!
+      // FIXME - the WebChromeClient should have no concept of adapters
       if (consoleMessageAdapter != null) {
         consoleMessageAdapter.notifyDataSetChanged();
       }
@@ -143,8 +177,8 @@ public class ElationWebView extends WebView {
   public ArrayList<ElationEvent> getElationEventsList() {
     return webViewClient.getElationEventsList();
   }
-  public ArrayList<Uri> getUriList() {
-    return webViewClient.getUriList();
+  public ArrayList<NetworkRequest> getNetworkRequestList() {
+    return webViewClient.getNetworkRequestList();
   }
   // FIXME - the WebView should have no concept of adapters
   public void setConsoleMessageAdapter(ArrayAdapter adapter) {
@@ -153,8 +187,8 @@ public class ElationWebView extends WebView {
   public void setElationEventsAdapter(ArrayAdapter adapter) {
     webViewClient.setElationEventsAdapter(adapter);
   }
-  public void setUriAdapter(ArrayAdapter adapter) {
-    webViewClient.setUriAdapter(adapter);
+  public void setNetworkRequestAdapter(ArrayAdapter adapter) {
+    webViewClient.setNetworkRequestAdapter(adapter);
   }
 }
 

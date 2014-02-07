@@ -9,11 +9,11 @@ import android.widget.TextView;
 import android.net.Uri;
 import java.util.ArrayList;
 
-public class ElationDebugNetworkAdapter extends ArrayAdapter<Uri> {
+public class ElationDebugNetworkAdapter extends ArrayAdapter<NetworkRequest> {
 
     private Context context;
 
-    public ElationDebugNetworkAdapter(Context context, int textViewResourceId, ArrayList<Uri> items) {
+    public ElationDebugNetworkAdapter(Context context, int textViewResourceId, ArrayList<NetworkRequest> items) {
         super(context, textViewResourceId, items);
         this.context = context;
     }
@@ -25,12 +25,22 @@ public class ElationDebugNetworkAdapter extends ArrayAdapter<Uri> {
             view = inflater.inflate(R.layout.debug_network_message, null);
         }
 
-        Uri item = getItem(position);
+        NetworkRequest item = getItem(position);
         if (item != null) {
-            TextView uriView = (TextView) view.findViewById(R.id.uri);
-            if (uriView != null) {
-                uriView.setText(item.toString());
+            TextView urlView = (TextView) view.findViewById(R.id.url);
+            if (urlView != null) {
+                urlView.setText(item.url);
             }
+/*
+            TextView timestampView = (TextView) view.findViewById(R.id.timestamp);
+            if (timestampView != null) {
+                if (item.finished) {
+                  timestampView.setText(item.getLoadTime() + "ms");
+                } else {
+                  timestampView.setText("loading...");
+                }
+            }
+*/
          }
 
         return view;
