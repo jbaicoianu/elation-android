@@ -1,18 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <EditTextPreference
-        android:key="config_hostname"
-        android:title="hostname"
-        android:inputType="textUri"
-        android:defaultValue="@string/config_hostname_default"
-        />
-    <EditTextPreference
         android:key="config_cobrand"
-        android:title="cobrand"
+        android:title="Cobrand"
         android:inputType="textUri"
         android:defaultValue="@string/config_cobrand_default"
         android:summary="@string/config_cobrand_default"
         />
+    <PreferenceCategory 
+        android:title="Web Settings"
+        android:key="config_web">
+
+        <EditTextPreference
+            android:key="config_web_hostname"
+            android:title="Web host"
+            android:inputType="textUri"
+            android:defaultValue="@string/config_web_hostname_default"
+            />
+        <EditTextPreference
+            android:key="config_web_startpage"
+            android:title="Start page"
+            android:inputType="textUri"
+            android:defaultValue="@string/config_web_startpage_default"
+            />
+    </PreferenceCategory>
+    <PreferenceCategory 
+        android:title="API Settings"
+        android:key="config_api">
+        <CheckBoxPreference
+            android:key="config_api_sameasweb"
+            android:title="Same as Web"
+            android:summary=""
+            android:defaultValue="true" />
+
+        <EditTextPreference
+            android:key="config_api_hostname"
+            android:title="API host"
+            android:inputType="textUri"
+            android:defaultValue="@string/config_api_hostname_default"
+            />
+    </PreferenceCategory>
 
 </PreferenceScreen>
 
