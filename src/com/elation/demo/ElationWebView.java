@@ -1,12 +1,15 @@
 package com.elation.demo;
 
 import android.content.Context;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebResourceResponse;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.widget.ProgressBar;
 import android.widget.ArrayAdapter;
 import android.util.AttributeSet;
@@ -30,18 +33,11 @@ public class ElationWebView extends WebView {
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       Uri uri = Uri.parse(url);
       if (uri.getScheme().equals("elation-event")) {
-        ElationEvent event = new ElationEvent(uri);
-        events.add(event);
+        NetworkRequest req = new NetworkRequest(url);
+        this.addNetworkRequest(req, view);
 
-        // FIXME - the WebViewClient should have no concept of adapters or the UI thread
-        if (elationEventsAdapter != null) {
-          ((Activity) view.getContext()).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              elationEventsAdapter.notifyDataSetChanged();
-            }
-          });
-        }
+        ElationEvent event = new ElationEvent(uri);
+        this.addElationEvent(event, view);
         return true;
       }
       return false;
@@ -50,20 +46,10 @@ public class ElationWebView extends WebView {
     public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
       NetworkRequest req = new NetworkRequest(url);
 
-      networkRequests.add(req);
       networkRequestsPending.add(req);
 
-      // FIXME - the WebViewClient should have no concept of adapters or the UI thread
-      if (networkRequestAdapter != null) {
-        ((Activity) view.getContext()).runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            networkRequestAdapter.notifyDataSetChanged();
-          }
-        });
-      }
-      WebResourceResponse foo = super.shouldInterceptRequest(view, url);
-      return foo;
+      this.addNetworkRequest(req, view);
+      return null;
     }
     @Override
     public void onLoadResource(WebView view, String url) {
@@ -71,6 +57,7 @@ public class ElationWebView extends WebView {
         if (req.url.equals(url)) {
           req.setFinished();
 
+/*
           if (networkRequestAdapter != null) {
             ((Activity) view.getContext()).runOnUiThread(new Runnable() {
               @Override
@@ -79,6 +66,7 @@ public class ElationWebView extends WebView {
               }
             });
           }
+*/
         }
       }
     }
@@ -87,7 +75,10 @@ public class ElationWebView extends WebView {
     public void onPageFinished(WebView view, String url) {
       if (first) {
         //adapter.add("> elation.native.subscribe('*')");
-        view.loadUrl("javascript:(function() { elation.native.subscribe('*'); })()");
+        view.evaluateJavascript("elation.onloads.add(function() { elation.native.subscribe('*'); });", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String s) { }
+        });
         first = false;
       }
       //TestElationEventsActivity.this.setTitle(view.getTitle());
@@ -105,6 +96,33 @@ public class ElationWebView extends WebView {
     }
     public void setNetworkRequestAdapter(ArrayAdapter nAdapter) {
       networkRequestAdapter = nAdapter;
+    }
+
+    private void addNetworkRequest(NetworkRequest req, View view) {
+      networkRequests.add(req);
+
+      // FIXME - the WebViewClient should have no concept of adapters, views, or the UI thread
+      if (networkRequestAdapter != null) {
+        ((Activity) view.getContext()).runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            networkRequestAdapter.notifyDataSetChanged();
+          }
+        });
+      }
+    }
+    private void addElationEvent(ElationEvent event, View view) {
+      events.add(event);
+
+      // FIXME - the WebViewClient should have no concept of adapters or the UI thread
+      if (elationEventsAdapter != null) {
+        ((Activity) view.getContext()).runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            elationEventsAdapter.notifyDataSetChanged();
+          }
+        });
+      }
     }
   }
   private class ElationWebChromeClient extends WebChromeClient {
@@ -146,6 +164,11 @@ public class ElationWebView extends WebView {
       consoleMessageAdapter = nAdapter;
     }
   }
+  private class ElationWebViewJsInterface {
+    // TODO - providing a native interface could provide us with a better way of passing events than via iframe loads
+    @JavascriptInterface
+    public boolean bridgeEvent() { return false; }
+  }
 
   private ElationWebViewClient webViewClient;
   private ElationWebChromeClient webChromeClient;
@@ -164,6 +187,8 @@ public class ElationWebView extends WebView {
     WebSettings webSettings = this.getSettings();
     webSettings.setJavaScriptEnabled(true);
     webSettings.setDomStorageEnabled(true);
+
+    this.addJavascriptInterface(new ElationWebViewJsInterface(), "elationNative");
   }
   public void setProgressBar(ProgressBar tProgress) {
     progress = tProgress;
