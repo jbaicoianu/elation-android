@@ -1,20 +1,22 @@
 package com.elation.demo;
 
 //import android.app.Fragment;
-import android.os.Bundle;
+
 import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.support.v4.app.Fragment;
-import android.widget.ListView;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
-import android.database.DataSetObserver;
-//import android.webkit.ConsoleMessage;
-import java.util.ArrayList;
+import android.widget.ListView;
 
-public class ElationDebugEventsFragment extends android.support.v4.app.Fragment {
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
+//import android.webkit.ConsoleMessage;
+
+public class ElationDebugEventsFragment extends android.support.v4.app.Fragment implements Observer{
   private ListView eventsList;
   private ArrayAdapter eventsListAdapter;
   private ArrayList<ElationEvent> events;
@@ -40,10 +42,20 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
       });
 */
 
-      webview.setElationEventsAdapter(eventsListAdapter);
+      webview.mAdapterObservable.register(this);
     }
     eventsList.setAdapter(eventsListAdapter);
     return view;
   }
+    @Override
+    public void onDestroy() {
+        ((ElationDemoActivity) getActivity()).getWebView().mAdapterObservable.unregister(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        eventsListAdapter.notifyDataSetChanged();
+    }
 }
 
