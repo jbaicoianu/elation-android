@@ -1,22 +1,23 @@
 package com.elation.demo;
 
 //import android.app.Fragment;
+
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.support.v4.app.Fragment;
-import android.widget.ListView;
 import android.widget.ArrayAdapter;
-import android.webkit.ConsoleMessage;
-import android.net.Uri;
-import java.util.ArrayList;
+import android.widget.ListView;
 
-public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment {
+import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
+public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment implements Observer {
   private ListView networkList;
   private ArrayAdapter networkListAdapter;
   private ArrayList<NetworkRequest> networkEntries;
-  
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.debug_network_fragment, container, false);
@@ -28,12 +29,22 @@ public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment
       networkEntries = webview.getNetworkRequestList();
 
       networkListAdapter = new ElationDebugNetworkAdapter(getActivity(), R.layout.debug_network_message, networkEntries);
-      
-      webview.setNetworkRequestAdapter(networkListAdapter);
+      webview.mAdapterObservable.register(this);
     }
     networkList.setAdapter(networkListAdapter);
 
     return view;
   }
+
+    @Override
+    public void onDestroy() {
+        ((ElationDemoActivity) getActivity()).getWebView().mAdapterObservable.unregister(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        networkListAdapter.notifyDataSetChanged();
+    }
 }
 
