@@ -16,11 +16,11 @@ import java.util.Observer;
 
 //import android.webkit.ConsoleMessage;
 
-public class ElationDebugEventsFragment extends android.support.v4.app.Fragment implements Observer{
+public class ElationDebugEventsFragment extends android.support.v4.app.Fragment implements Observer {
   private ListView eventsList;
   private ArrayAdapter eventsListAdapter;
   private ArrayList<ElationEvent> events;
-
+  private ElationWebView webview;
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.debug_events_fragment, container, false);
@@ -29,33 +29,24 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
     final Context context = getActivity();
     if (eventsListAdapter == null) {
       // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
-      ElationWebView webview = ((ElationDemoActivity) getActivity()).getWebView();
+      webview = ((ElationDemoActivity) getActivity()).getWebView();
       events = webview.getElationEventsList();
       eventsListAdapter = new ElationDebugEventsAdapter(getActivity(), R.layout.debug_events_message, events);
-      
-/*
-      eventsListAdapter.registerDataSetObserver(new DataSetObserver() {
-        @Override
-        public void onChanged() {
-          Toast.makeText(context, "fuck", Toast.LENGTH_SHORT).show();
-        }
-      });
-*/
 
       webview.mAdapterObservable.register(this);
     }
     eventsList.setAdapter(eventsListAdapter);
     return view;
   }
-    @Override
-    public void onDestroy() {
-        ((ElationDemoActivity) getActivity()).getWebView().mAdapterObservable.unregister(this);
-        super.onDestroy();
-    }
+  @Override
+  public void onDestroy() {
+    webview.mAdapterObservable.unregister(this);
+    super.onDestroy();
+  }
 
-    @Override
-    public void update(Observable observable, Object data) {
-        eventsListAdapter.notifyDataSetChanged();
-    }
+  @Override
+  public void update(Observable observable, Object data) {
+    eventsListAdapter.notifyDataSetChanged();
+  }
 }
 
