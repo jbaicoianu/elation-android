@@ -106,7 +106,7 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
 
       //debugPanel.invalidate();
       // FIXME - this probably isn't the best way to trigger a redraw
-      debugPanel.requestLayout();
+      debugPanel.invalidate();
 
       eventHandled = true;
     }
