@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.webkit.*;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
@@ -51,15 +50,15 @@ public class ElationWebView extends WebView {
             if (first) {
                 //adapter.add("> elation.native.subscribe('*')");
                 String jscode = "elation.onloads.add(function() { elation.native.subscribe('*'); });";
-                view.evaluateJavascript(jscode, new ValueCallback<String>())
+                ((ElationWebView) view).injectJavascript(jscode);
                 first = false;
             }
             //TestElationEventsActivity.this.setTitle(view.getTitle());
         }
 
         private void addElationEvent(ElationEvent event) {
-                events.add(event);
-                mAdapterObservable.notify(ElationDebugEventsAdapter.class);
+            events.add(event);
+            mAdapterObservable.notify(ElationDebugEventsAdapter.class);
         }
         private void addNetworkRequest(NetworkRequest req) {
             networkRequests.add(req);
@@ -84,7 +83,6 @@ public class ElationWebView extends WebView {
     private class ElationWebChromeClient extends WebChromeClient {
         private ProgressBar progress;
         private ArrayList<ConsoleMessage> logs = new ArrayList<ConsoleMessage>();
-        private ArrayAdapter consoleMessageAdapter;
 
         public void onProgressChanged(WebView view, int value) {
             if (progress != null) {
@@ -100,13 +98,8 @@ public class ElationWebView extends WebView {
             //TestElationEventsActivity.this.setTitle(view.getTitle());
         }
 
-        public boolean onConsoleMessage(ConsoleMessage cm) {
-            logs.add(cm);
-
-            // FIXME - the WebChromeClient should have no concept of adapters
-            if (consoleMessageAdapter != null) {
-                consoleMessageAdapter.notifyDataSetChanged();
-            }
+        public boolean onConsoleMessage(ConsoleMessage msg) {
+            this.addConsoleMessage(msg);
             return true;
         }
 
@@ -118,9 +111,9 @@ public class ElationWebView extends WebView {
             return logs;
         }
 
-        // FIXME - the WebChromeClient should have no concept of adapters
-        public void setConsoleMessageAdapter(ArrayAdapter nAdapter) {
-            consoleMessageAdapter = nAdapter;
+        public void addConsoleMessage(ConsoleMessage msg) {
+            logs.add(msg);
+            mAdapterObservable.notify(ElationDebugConsoleFragment.class);
         }
     }
 
@@ -168,9 +161,11 @@ public class ElationWebView extends WebView {
         return webViewClient.getNetworkRequestList();
     }
 
-    // FIXME - the WebView should have no concept of adapters
-    public void setConsoleMessageAdapter(ArrayAdapter adapter) {
-        webChromeClient.setConsoleMessageAdapter(adapter);
+    public void injectJavascript(String jscode) {
+        this.evaluateJavascript(jscode, new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String s) { }
+        });
     }
 }
 
