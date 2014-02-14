@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <EditTextPreference
-        android:key="config_cobrand"
-        android:title="Cobrand"
-        android:inputType="textUri"
-        android:defaultValue="@string/config_cobrand_default"
-        android:summary="@string/config_cobrand_default"
-        />
     <PreferenceCategory 
         android:title="Web Settings"
         android:key="config_web">
@@ -40,6 +33,23 @@
             android:defaultValue="@string/config_api_hostname_default"
             />
     </PreferenceCategory>
-
+    <PreferenceCategory 
+        android:title="Global Settings"
+        android:key="config_global">
+        <EditTextPreference
+            android:key="config_cobrand"
+            android:title="Cobrand"
+            android:inputType="textUri"
+            android:defaultValue="@string/config_cobrand_default"
+            android:summary="@string/config_cobrand_default"
+            />
+        <SwitchPreference
+            android:key="config_reset_defaults"
+            android:summaryOff="Restore Defaults?"
+            android:summaryOn="Defaults restored"
+            android:switchTextOff="YES"
+            android:switchTextOn=""
+            />
+    </PreferenceCategory>
 </PreferenceScreen>
 

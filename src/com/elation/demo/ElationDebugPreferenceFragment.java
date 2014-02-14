@@ -7,7 +7,9 @@ import android.support.v4.preference.PreferenceFragment;
 import android.preference.Preference;
 import android.preference.EditTextPreference;
 import android.preference.CheckBoxPreference;
+import android.preference.SwitchPreference;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -15,7 +17,9 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 
 public class ElationDebugPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
-  private EditTextPreference cobrand;
+  private EditTextPreference global_cobrand;
+  private SwitchPreference global_reset_defaults;
+
   private EditTextPreference web_hostname;
   private EditTextPreference web_startpage;
                                   
@@ -37,14 +41,14 @@ public class ElationDebugPreferenceFragment extends PreferenceFragment implement
     api_hostname = (EditTextPreference) findPreference("config_api_hostname");
     api_sameasweb = (CheckBoxPreference) findPreference("config_api_sameasweb");
 
-    cobrand = (EditTextPreference) findPreference("config_cobrand");
+    global_cobrand = (EditTextPreference) findPreference("config_cobrand");
+    global_reset_defaults = (SwitchPreference) findPreference("config_reset_defaults");
 
     getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
     web_hostname.setSummary(web_hostname.getText());
     web_startpage.setSummary(web_startpage.getText());
-
-    cobrand.setSummary(cobrand.getText());
+    global_cobrand.setSummary(global_cobrand.getText());
 
     setApiHostVisibility();
   }
@@ -56,6 +60,8 @@ public class ElationDebugPreferenceFragment extends PreferenceFragment implement
       editTextPreference.setSummary(editTextPreference.getText());
     } else if (preference == api_sameasweb) {
       setApiHostVisibility();
+    } else if (preference == global_reset_defaults) {
+      this.resetDefaults();
     }
   }
   public void setApiHostVisibility() {
@@ -68,6 +74,16 @@ public class ElationDebugPreferenceFragment extends PreferenceFragment implement
       //api_category.addPreference(api_hostname);
       api_hostname.setEnabled(true);
     }
+  }
+  public void resetDefaults() {
+    web_hostname.setText(getActivity().getString(R.string.config_web_hostname_default));
+    web_startpage.setText(getActivity().getString(R.string.config_web_startpage_default));
+    api_hostname.setText(getActivity().getString(R.string.config_api_hostname_default));
+    global_cobrand.setText(getActivity().getString(R.string.config_cobrand_default));
+
+    //global_reset_defaults.setChecked(false);
+    global_reset_defaults.getEditor().putBoolean("config_reset_defaults", false).apply();
+
   }
 }
 
