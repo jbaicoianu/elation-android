@@ -39,7 +39,7 @@ public class AdapterObservable {
             mObservables.put(key, o);
             Log.i(this.getClass().getName(), "new Observable for:" + key);
         }
-        Log.i(this.getClass().getName(), "Registered " + key);
+        Log.i(this.getClass().getName(), "Registered " + observer.toString() + " " + key);
         Log.i(this.getClass().getName(), "Observers:" + mObservables.size());
     }
 
@@ -47,7 +47,7 @@ public class AdapterObservable {
         String key = observer.getClass().getName();
         if (mObservables.containsKey(key)) {
             mObservables.get(key).deleteObserver(observer);
-            Log.i(this.getClass().getName(), "Unregistered " + key);
+            Log.i(this.getClass().getName(), "Unegistered " + observer.toString() + " " + key);
             Log.i(this.getClass().getName(), "Observers:" + mObservables.size());
             return true;
         } else return false;
@@ -63,9 +63,12 @@ public class AdapterObservable {
     }
 
     public boolean notify(Class observable, Object o) {
+        /*
+         * Class will always return a valid string
+         */
         String key = observable.getName();
         if (observable == null || !mObservables.containsKey(key)) {
-            Log.i(this.getClass().getName(), "Can't find:" + key);
+            Log.i(this.getClass().getName(), "No Observable registered for:" + key);
             return false;
         } else if (mObservables.get(key).countObservers() > 0) {
             ElationEventObservable mo = (ElationEventObservable) mObservables.get(key);

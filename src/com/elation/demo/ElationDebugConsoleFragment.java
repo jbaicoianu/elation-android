@@ -59,9 +59,9 @@ public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment
     }
 
     @Override
-    public void onDestroyView() {
+    public void onPause() {
         webview.mAdapterObservable.unregister(this);
-        super.onDestroyView();
+        super.onPause();
     }
 
     @Override
