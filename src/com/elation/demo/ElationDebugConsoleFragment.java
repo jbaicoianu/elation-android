@@ -35,12 +35,11 @@ public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment
         if (consoleListAdapter == null) {
             // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
             webview = ((ElationDemoActivity) getActivity()).getWebView();
-            webview.mAdapterObservable.register(this);
             consoleEntries = new ArrayList<ConsoleMessage>();
             consoleEntries.addAll(eventStore.getConsoleMessages());
-
             consoleListAdapter = new ElationDebugConsoleMessageAdapter(getActivity(), R.layout.debug_console_message, consoleEntries);
         }
+        webview.mAdapterObservable.register(this);
         if (consoleList != null) {
             consoleList.setAdapter(consoleListAdapter);
         }
