@@ -13,7 +13,7 @@ public abstract class WebViewJavascriptInjector {
 
     public static void injectJavascript(WebView webview, String jscode) {
         if (_injector == null) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 _injector = new KitKatInjector();
             else
                 _injector = new LegacyInjector();
