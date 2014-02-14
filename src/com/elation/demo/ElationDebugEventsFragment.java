@@ -33,8 +33,9 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
         if (eventsListAdapter == null) {
             // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
             webview = ((ElationDemoActivity) getActivity()).getWebView();
-            events = eventStore.getElationEventsList();
-            eventsListAdapter = new ElationDebugEventsAdapter(getActivity(), R.layout.debug_events_message, events);
+            events = new ArrayList<ElationEvent>();
+            events.addAll(eventStore.getElationEventsList());
+            eventsListAdapter = new ElationDebugEventsAdapter(getActivity(),R.layout.debug_events_message, events);
 
             webview.mAdapterObservable.register(this);
         }
@@ -50,9 +51,11 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
 
     @Override
     public void update(Observable observable, Object data) {
+        final ElationEvent event = (ElationEvent) data;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                events.add(event);
                 eventsListAdapter.notifyDataSetChanged();
             }
         });

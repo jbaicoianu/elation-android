@@ -3,7 +3,6 @@ package com.elation.demo;
 //import android.app.Fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +29,9 @@ public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment
         if (networkListAdapter == null) {
             // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
             webview = ((ElationDemoActivity) getActivity()).getWebView();
-            //networkEntries = eventStore.getNetworkRequestList();
-            networkListAdapter = new ElationDebugNetworkAdapter(getActivity(), R.layout.debug_network_message, eventStore.getNetworkRequestList());
+            networkEntries = new ArrayList<NetworkRequest>();
+            networkEntries.addAll(eventStore.getNetworkRequestList());
+            networkListAdapter = new ElationDebugNetworkAdapter(getActivity(), R.layout.debug_network_message, networkEntries);
             webview.mAdapterObservable.register(this);
         }
         networkList.setAdapter(networkListAdapter);
@@ -47,9 +47,11 @@ public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment
 
     @Override
     public void update(Observable observable, Object data) {
+        final NetworkRequest request = (NetworkRequest) data;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                networkEntries.add(request);
                 networkListAdapter.notifyDataSetChanged();
             }
         });
