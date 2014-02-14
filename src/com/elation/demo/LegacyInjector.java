@@ -8,6 +8,6 @@ import android.webkit.WebView;
 public class LegacyInjector extends WebViewJavascriptInjector {
     @Override
     public void inject(WebView webview, String jscode) {
-        webview.loadUrl("javascript:(function() {"+jscode);
+        webview.loadUrl("javascript:(function() {" + jscode + "})()");
     }
 }
