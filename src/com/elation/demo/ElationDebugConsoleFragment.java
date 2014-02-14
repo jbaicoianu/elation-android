@@ -48,7 +48,7 @@ public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment
             consoleInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    self.webview.injectJavascript(v.getText().toString());
+                    WebViewJavascriptInjector.injectJavascript(self.webview, v.getText().toString());
                     v.setText("");
                     return true;
                 }

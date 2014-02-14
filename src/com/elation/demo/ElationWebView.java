@@ -47,7 +47,7 @@ public class ElationWebView extends WebView {
             if (first) {
                 //adapter.add("> elation.native.subscribe('*')");
                 String jscode = "elation.onloads.add(function() { elation.native.subscribe('*'); });";
-                ((ElationWebView) view).injectJavascript(jscode);
+                WebViewJavascriptInjector.injectJavascript(view, jscode);
                 first = false;
             }
             //TestElationEventsActivity.this.setTitle(view.getTitle());
@@ -135,14 +135,6 @@ public class ElationWebView extends WebView {
         if (webChromeClient != null) {
             webChromeClient.setProgressBar(progress);
         }
-    }
-
-    public void injectJavascript(String jscode) {
-        this.evaluateJavascript(jscode, new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String s) {
-            }
-        });
     }
 }
 
