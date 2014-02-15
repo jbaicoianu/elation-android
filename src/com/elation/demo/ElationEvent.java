@@ -4,6 +4,7 @@ import android.net.Uri;
 public class ElationEvent 
 {
   public String type;
+  public String target;
   public String dataRaw;
 
   public ElationEvent(String raw) {
@@ -22,7 +23,8 @@ public class ElationEvent
       // properly-formed URL, <prefix>://<event.type>/<event.data>
       // Use Uri's built-in parsing
       this.setType(evUri.getHost());
-      this.setData(evUri.getPath());
+      this.setTarget(evUri.getPath());
+      this.setData(evUri.getQuery());
     } else {
       // improperly-formed URL, <prefix>:<event.type>/<event.data>
       // Perform basic string parsing
@@ -38,12 +40,21 @@ public class ElationEvent
   public void setType(String ttype) {
     type = ttype;
   }
-  public void setData(String tdata) {
-    if (tdata.length() > 0 && tdata.charAt(0) == '/') {
-      // Strip leading / if present
-      dataRaw = tdata.substring(1);
+  public void setTarget(String tid) {
+    if (tid.charAt(0) == '/') {
+      target = tid.substring(1);
     } else {
-      dataRaw = tdata;
+      target = tid;
+    }
+  }
+  public void setData(String tdata) {
+    if (tdata != null) {
+      if (tdata.length() > 0 && tdata.charAt(0) == '/') {
+        // Strip leading / if present
+        dataRaw = tdata.substring(1);
+      } else {
+        dataRaw = tdata;
+      }
     }
   }
   public boolean hasData() {

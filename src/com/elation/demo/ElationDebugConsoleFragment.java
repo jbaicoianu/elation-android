@@ -1,38 +1,78 @@
 package com.elation.demo;
 
 //import android.app.Fragment;
+
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.LayoutInflater;
-import android.support.v4.app.Fragment;
-import android.widget.ListView;
-import android.widget.ArrayAdapter;
 import android.webkit.ConsoleMessage;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
+
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
-public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment {
-  private ListView consoleList;
-  private ArrayAdapter consoleListAdapter;
-  private ArrayList<ConsoleMessage> consoleEntries;
-  
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.debug_console_fragment, container, false);
-    consoleList = (ListView) view.findViewById(R.id.debug_console_list);
+public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment implements Observer {
+    private ListView consoleList;
+    private EditText consoleInput;
+    private ArrayAdapter consoleListAdapter;
+    private ArrayList<ConsoleMessage> consoleEntries;
+    private ElationWebView webview;
+    private EventStore eventStore;
 
-    if (consoleListAdapter == null) {
-      // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
-      ElationWebView webview = ((ElationDemoActivity) getActivity()).getWebView();
-      consoleEntries = webview.getConsoleMessages();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.debug_console_fragment, container, false);
+        consoleList = (ListView) view.findViewById(R.id.debug_console_list);
+        consoleInput = (EditText) view.findViewById(R.id.debug_console_input);
+        eventStore = (EventStore) getActivity().getApplicationContext();
 
-      //consoleListAdapter = new ArrayAdapter(getActivity(), R.layout.debug_console_list_entry, R.id.label, consoleEntries);
-      consoleListAdapter = new ElationDebugConsoleMessageAdapter(getActivity(), R.layout.debug_console_message, consoleEntries);
-      
-      webview.setConsoleMessageAdapter(consoleListAdapter);
+        if (consoleListAdapter == null) {
+            // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
+            webview = ((ElationDemoActivity) getActivity()).getWebView();
+            consoleEntries = new ArrayList<ConsoleMessage>();
+            consoleEntries.addAll(eventStore.getConsoleMessages());
+            consoleListAdapter = new ElationDebugConsoleMessageAdapter(getActivity(), R.layout.debug_console_message, consoleEntries);
+        }
+        webview.mAdapterObservable.register(this);
+        if (consoleList != null) {
+            consoleList.setAdapter(consoleListAdapter);
+        }
+        if (consoleInput != null) {
+            final ElationDebugConsoleFragment self = this;
+            consoleInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    WebViewJavascriptInjector.injectJavascript(self.webview, v.getText().toString());
+                    v.setText("");
+                    return true;
+                }
+            });
+        }
+
+        return view;
     }
-    consoleList.setAdapter(consoleListAdapter);
 
-    return view;
-  }
+    @Override
+    public void onPause() {
+        webview.mAdapterObservable.unregister(this);
+        super.onPause();
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        final ConsoleMessage message = (ConsoleMessage) data;
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                consoleEntries.add(message);
+                consoleListAdapter.notifyDataSetChanged();
+            }
+        });
+    }
 }

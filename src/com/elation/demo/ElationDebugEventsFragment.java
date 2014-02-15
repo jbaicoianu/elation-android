@@ -16,46 +16,48 @@ import java.util.Observer;
 
 //import android.webkit.ConsoleMessage;
 
-public class ElationDebugEventsFragment extends android.support.v4.app.Fragment implements Observer{
-  private ListView eventsList;
-  private ArrayAdapter eventsListAdapter;
-  private ArrayList<ElationEvent> events;
+public class ElationDebugEventsFragment extends android.support.v4.app.Fragment implements Observer {
+    private ListView eventsList;
+    private ArrayAdapter eventsListAdapter;
+    private ArrayList<ElationEvent> events;
+    private ElationWebView webview;
+    private EventStore eventStore;
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.debug_events_fragment, container, false);
-    eventsList = (ListView) view.findViewById(R.id.debug_events_list);
-
-    final Context context = getActivity();
-    if (eventsListAdapter == null) {
-      // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
-      ElationWebView webview = ((ElationDemoActivity) getActivity()).getWebView();
-      events = webview.getElationEventsList();
-      eventsListAdapter = new ElationDebugEventsAdapter(getActivity(), R.layout.debug_events_message, events);
-      
-/*
-      eventsListAdapter.registerDataSetObserver(new DataSetObserver() {
-        @Override
-        public void onChanged() {
-          Toast.makeText(context, "fuck", Toast.LENGTH_SHORT).show();
-        }
-      });
-*/
-
-      webview.mAdapterObservable.register(this);
-    }
-    eventsList.setAdapter(eventsListAdapter);
-    return view;
-  }
     @Override
-    public void onDestroy() {
-        ((ElationDemoActivity) getActivity()).getWebView().mAdapterObservable.unregister(this);
-        super.onDestroy();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.debug_events_fragment, container, false);
+        eventsList = (ListView) view.findViewById(R.id.debug_events_list);
+
+        final Context context = getActivity();
+        eventStore = (EventStore) context.getApplicationContext();
+        if (eventsListAdapter == null) {
+            // onCreateView is called every time this fragment is loaded in a tab, but we can reuse most of these objects
+            webview = ((ElationDemoActivity) getActivity()).getWebView();
+            events = new ArrayList<ElationEvent>();
+            events.addAll(eventStore.getElationEventsList());
+            eventsListAdapter = new ElationDebugEventsAdapter(getActivity(),R.layout.debug_events_message, events);
+        }
+        webview.mAdapterObservable.register(this);
+        eventsList.setAdapter(eventsListAdapter);
+        return view;
+    }
+
+    @Override
+    public void onPause() {
+        webview.mAdapterObservable.unregister(this);
+        super.onPause();
     }
 
     @Override
     public void update(Observable observable, Object data) {
-        eventsListAdapter.notifyDataSetChanged();
+        final ElationEvent event = (ElationEvent) data;
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                events.add(event);
+                eventsListAdapter.notifyDataSetChanged();
+            }
+        });
     }
 }
 

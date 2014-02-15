@@ -31,6 +31,12 @@ public class ElationDebugEventsAdapter extends ArrayAdapter<ElationEvent> {
             if (eventType != null) {
                 eventType.setText(event.type);
             }
+            TextView eventTarget = (TextView) view.findViewById(R.id.event_target);
+            if (eventTarget != null) {
+                if (event.target != null) {
+                  eventTarget.setText(event.target);
+                }
+            }
             TextView eventData = (TextView) view.findViewById(R.id.event_data);
             if (eventData != null) {
                 if (event.hasData()) {
