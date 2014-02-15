@@ -1,6 +1,5 @@
 package com.elation.demo;
-import android.net.Uri;
-import android.os.SystemClock;
+import static android.os.SystemClock.elapsedRealtime;
 
 public class NetworkRequest {
   public String url;
@@ -10,11 +9,11 @@ public class NetworkRequest {
 
   public NetworkRequest(String url) {
     this.url = url;
-    this.timeStart = System.currentTimeMillis();
+    this.timeStart = elapsedRealtime();
   }
   public void setFinished() {
     this.finished = true;
-    this.timeEnd = System.currentTimeMillis();
+    this.timeEnd = elapsedRealtime();
   }
   public long getLoadTime() {
     if (timeStart > 0 && timeEnd > 0) {
