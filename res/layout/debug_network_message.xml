@@ -10,13 +10,12 @@
         android:singleLine="true"
         android:textSize="8dp" >
     </TextView>
-    <TextView
+    <!-- TextView
         android:id="@+id/timestamp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:textSize="8dp" >
-    </TextView>
-
+    </TextView -->
 </LinearLayout> 
 
