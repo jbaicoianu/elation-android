@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,15 +14,19 @@ import android.view.GestureDetector;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.TabWidget;
 import android.widget.TabHost;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v4.app.FragmentActivity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class ElationDebugFragment extends Fragment implements OnTouchListener {
   private RelativeLayout debugPanel;
+  private ViewGroup.LayoutParams debugPanelParams;
   private RelativeLayout debugPanelHeader;
   private TabWidget debugTabs;
   private FragmentTabHost debugTabHost;
@@ -31,6 +36,10 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
   private long lastTouchTime;
   private boolean hidden;
   private int hiddenheight;
+  private Handler updateSettingsHandler;
+  private Runnable updateSettingsRunnable;
+  private boolean updateSettingsPending = false;
+  private long updateSettingsDelay = 500;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,6 +58,7 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
     debugTabHost = (FragmentTabHost) view.findViewById(android.R.id.tabhost);
 
     // Added an AttachStateChangeListener to prevent the TabHost from stealing focus from keyboards
+    final ElationDebugFragment self = this;
     debugTabHost.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
         @Override
         public void onViewDetachedFromWindow(View v) {}
@@ -57,10 +67,18 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
             debugTabHost.getViewTreeObserver().removeOnTouchModeChangeListener(debugTabHost);
         }
     });
+    updateSettingsRunnable = new Runnable() {
+      public void run() {
+        self.saveHeight();
+        self.updateSettingsPending = false;
+      }
+    };
 
     FragmentActivity fragact = (FragmentActivity) getActivity();
-    debugTabHost.setup(fragact, fragact.getSupportFragmentManager(), R.id.debug_tab_content);
+    debugTabHost.setup(fragact, fragact.getSupportFragmentManager(), android.R.id.tabcontent);
     debugTabHost.getTabWidget().setDividerDrawable(R.drawable.tab_divider);
+
+    updateSettingsHandler = view.getHandler();
 
     TabHost.TabSpec spec;
     spec = debugTabHost.newTabSpec("Events").setIndicator(createTabView(getActivity(), "Events"));
@@ -75,8 +93,16 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
     spec = debugTabHost.newTabSpec("Settings").setIndicator(createTabView(getActivity(), "Settings"));
     debugTabHost.addTab(spec, ElationDebugPreferenceFragment.class, null);
 
-
     return view;
+  }
+  @Override
+  public void onResume () {
+    super.onResume();
+
+    // set initial height
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    int lastheight = prefs.getInt("debug_panel_height", 200);
+    this.setHeight(lastheight);
   }
   @Override
   public boolean onTouch(View v, MotionEvent event) {
@@ -97,14 +123,9 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
       float newypos = event.getRawY();
       float ydiff = ypos - newypos;
       int newheight = (int) (height + ydiff);
-      int headerheight = debugPanelHeader.getHeight();
-      if (newheight < headerheight) {
-        newheight = headerheight;
-      }
       hidden = false;
-      debugPanel.getLayoutParams().height = newheight;
+      this.setHeight(newheight);
 
-      //debugPanel.invalidate();
       // FIXME - this probably isn't the best way to trigger a redraw
       debugPanel.requestLayout();
 
@@ -116,16 +137,49 @@ public class ElationDebugFragment extends Fragment implements OnTouchListener {
 
     return eventHandled;
   }
+  public void maximize() {
+      this.setHeight(100);
+  }
   public void toggleVisible() {
     if (hidden) {
-      debugPanel.getLayoutParams().height = hiddenheight;
+      this.setHeight(hiddenheight);
     } else {
       hiddenheight = height;
       height = debugPanelHeader.getHeight();
-      debugPanel.getLayoutParams().height = height;
+      this.setHeight(height);
     }
     debugPanel.requestLayout();
     hidden = !hidden;
+  }
+  public void setHeight(int height) {
+    if (debugPanelParams == null) {
+      debugPanelParams = debugPanel.getLayoutParams();
+    }
+    if (debugPanelParams != null) {
+      int headerheight = debugPanelHeader.getHeight();
+      if (height < headerheight) {
+        height = headerheight;
+      }
+      debugPanelParams.height = height;
+
+      // If the Handler is null, get it from the view
+      if (this.updateSettingsHandler == null) {
+        this.updateSettingsHandler = getView().getHandler();
+      }
+      if (this.updateSettingsHandler != null && this.updateSettingsRunnable != null) {
+        // If an update is pending, clear the previous callbacks and set a new one
+        if (this.updateSettingsPending) {
+          this.updateSettingsHandler.removeCallbacks(this.updateSettingsRunnable);
+        }
+        this.updateSettingsHandler.postDelayed(this.updateSettingsRunnable, this.updateSettingsDelay);
+        this.updateSettingsPending = true;
+      }
+    }
+  }
+  public void saveHeight() {
+    int height = debugPanelParams.height;
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    prefs.edit().putInt("debug_panel_height", height).apply();
   }
 
   private View createTabView(final Context context, final String text) {

@@ -22,57 +22,39 @@
                 android:layout_height="wrap_content"
                 android:text="Elation Debugger"
                 />
-            <ImageButton
-                android:id="@+id/debug_button"
+            <Button android:id="@+id/debug_button"
                 android:layout_alignParentRight="true"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:scaleType="fitXY"
-                android:padding="2dp"
                 android:background="@null"
-                android:src="@android:drawable/ic_menu_preferences" />
-
+                android:text="@string/debug_console_maximize"
+            />
         </RelativeLayout>
 
 
-<android.support.v4.app.FragmentTabHost
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@android:id/tabhost"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent"
-  >
+        <android.support.v4.app.FragmentTabHost
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@android:id/tabhost"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            >
 
-  <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
 
-    <TabWidget
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:id="@android:id/tabs">
-    </TabWidget>
+                <TabWidget
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@android:id/tabs">
+                </TabWidget>
 
-      <FrameLayout
-        android:id="@android:id/tabcontent"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <FrameLayout
-          android:id="@+id/debug_tab_content"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent" />
-
-<!--
-        <FrameLayout
-          android:id="@+id/debug_tab_2"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent" />
-      -->
-      
-      </FrameLayout>
-  </LinearLayout>
-</android.support.v4.app.FragmentTabHost>
-
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" />
+            </LinearLayout>
+        </android.support.v4.app.FragmentTabHost>
     </LinearLayout>
 </RelativeLayout>

@@ -5,4 +5,6 @@
     <string name="config_web_startpage_default">/</string>
     <string name="config_api_hostname_default">elationframework.com</string>
     <string name="config_cobrand_default"></string>
+    <string name="debug_console_maximize">▲</string>
+    <string name="debug_console_minimize">▼</string>
 </resources>
