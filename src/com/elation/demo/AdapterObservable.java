@@ -30,13 +30,15 @@ public class AdapterObservable {
 
     public void register(Observer observer) {
         String key = observer.getClass().getName();
+        Observable observable;
         if (mObservables.containsKey(key)) {
-            mObservables.get(key).addObserver(observer);
+            observable = mObservables.get(key);
+            observable.addObserver(observer);
             Log.i(this.getClass().getName(), "Adding to Observable for:" + key);
         } else {
-            Observable o = new ElationEventObservable();
-            o.addObserver(observer);
-            mObservables.put(key, o);
+            observable = new ElationEventObservable();
+            observable.addObserver(observer);
+            mObservables.put(key, observable);
             Log.i(this.getClass().getName(), "new Observable for:" + key);
         }
         Log.i(this.getClass().getName(), "Registered " + observer.toString() + " " + key);

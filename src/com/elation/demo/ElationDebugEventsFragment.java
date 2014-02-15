@@ -43,7 +43,7 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
     }
 
     @Override
-    public void onPause() {
+    public void onDestroyView() {
         webview.mAdapterObservable.unregister(this);
         super.onPause();
     }
