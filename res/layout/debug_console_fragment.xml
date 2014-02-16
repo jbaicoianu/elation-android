@@ -6,21 +6,27 @@
     <ListView android:id="@+id/debug_console_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="36dp"
         android:transcriptMode="alwaysScroll"
         android:stackFromBottom="true"
         />
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
-
-    <EditText android:id="@+id/debug_console_input"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:singleLine="true"
-        android:hint="Inject JavaScript"
         android:layout_alignParentBottom="true" 
-        />
+        >
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/holo_blue_dark"
+            />
+        <EditText android:id="@+id/debug_console_input"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10dp"
+            android:singleLine="true"
+            android:hint="Inject JavaScript"
+            />
+    </LinearLayout>
 </RelativeLayout>
