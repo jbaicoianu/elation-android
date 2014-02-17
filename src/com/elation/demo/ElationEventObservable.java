@@ -12,8 +12,8 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Provides fragments implementing the Observer interface with methods to register/deregister/notify
- * Relies on the assumption that all Observing fragments for a given Observable will be the same class
+ * Provides classes implementing the Observer interface with methods to register/deregister/notify
+ * for events by name
  */
 public class ElationEventObservable {
     public static final String COM_ELATION_EVENT = "com.elation.event.";
@@ -76,22 +76,22 @@ public class ElationEventObservable {
         if (mObservables.containsKey(key)) {
             observable = mObservables.get(key);
             observable.addObserver(observer);
-            Log.i(this.getClass().getName(), "Adding to Observable for:" + key);
+            Log.d(this.getClass().getName(), "Adding to Observable for:" + key);
         } else {
             observable = new EventObservable();
             observable.addObserver(observer);
             mObservables.put(key, observable);
-            Log.i(this.getClass().getName(), "new Observable for:" + key);
+            Log.d(this.getClass().getName(), "new Observable for:" + key);
         }
-        Log.i(this.getClass().getName(), "Registered " + observer.toString() + " " + key);
-        Log.i(this.getClass().getName(), "Observables:" + mObservables.size());
+        Log.d(this.getClass().getName(), "Registered " + observer.toString() + " " + key);
+        Log.d(this.getClass().getName(), "Observables:" + mObservables.size());
     }
 
     public boolean unregister(String key, Observer observer) {
         if (mObservables.containsKey(key)) {
             mObservables.get(key).deleteObserver(observer);
-            Log.i(this.getClass().getName(), "Unegistered " + observer.toString() + " " + key);
-            Log.i(this.getClass().getName(), "Observables:" + mObservables.size());
+            Log.d(this.getClass().getName(), "Unegistered " + observer.toString() + " " + key);
+            Log.d(this.getClass().getName(), "Observables:" + mObservables.size());
             return true;
         } else return false;
     }
@@ -107,19 +107,22 @@ public class ElationEventObservable {
 
     public boolean notify(String key, Object event) {
         if (key == null || !mObservables.containsKey(key)) {
-            Log.i(this.getClass().getName(), "No Observable registered for:" + key);
+            Log.d(this.getClass().getName(), "No Observable registered for:" + key);
             return false;
         } else if (mObservables.get(key).countObservers() > 0) {
             EventObservable mo = (EventObservable) mObservables.get(key);
             mo.changed();
             mo.notifyObservers(event);
-            Log.i(this.getClass().getName(), "Notified Observers:" + key + " with event " + event.toString());
+            Log.d(this.getClass().getName(), "Notified Observers:" + key + " with event " + event.toString());
             return true;
         }
-        Log.i(this.getClass().getName(), "No Observers to Notify");
+        Log.d(this.getClass().getName(), "No Observers to Notify");
         return false;
     }
 
+    /*
+     * Subclassed to get around protected method in Observable
+     */
     private class EventObservable extends Observable {
         public void changed() {
             setChanged();
