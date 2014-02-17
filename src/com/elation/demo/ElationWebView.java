@@ -67,7 +67,7 @@ public class ElationWebView extends WebView {
     private class ElationWebViewJsInterface {
         // TODO - providing a native interface could provide us with a more efficient way of passing events
         @JavascriptInterface
-        public boolean bridgeEvent() {
+        public String bridgeEvent(String event) {
             return false;
         }
     }

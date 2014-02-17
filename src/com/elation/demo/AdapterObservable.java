@@ -42,7 +42,7 @@ public class AdapterObservable {
             Log.i(this.getClass().getName(), "new Observable for:" + key);
         }
         Log.i(this.getClass().getName(), "Registered " + observer.toString() + " " + key);
-        Log.i(this.getClass().getName(), "Observers:" + mObservables.size());
+        Log.i(this.getClass().getName(), "Observables:" + mObservables.size());
     }
 
     public boolean unregister(Observer observer) {
@@ -50,7 +50,7 @@ public class AdapterObservable {
         if (mObservables.containsKey(key)) {
             mObservables.get(key).deleteObserver(observer);
             Log.i(this.getClass().getName(), "Unegistered " + observer.toString() + " " + key);
-            Log.i(this.getClass().getName(), "Observers:" + mObservables.size());
+            Log.i(this.getClass().getName(), "Observables:" + mObservables.size());
             return true;
         } else return false;
     }
