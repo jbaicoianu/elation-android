@@ -7,7 +7,7 @@ import android.webkit.*;
 import android.widget.ProgressBar;
 
 public class ElationWebView extends WebView {
-    protected AdapterObservable mAdapterObservable;
+    protected ElationEventObservable mElationEventObservable;
     protected EventStore eventStore;
 
     private class ElationWebViewClient extends WebViewClient {
@@ -37,7 +37,7 @@ public class ElationWebView extends WebView {
             for (NetworkRequest req : eventStore.getNetworkRequestPendingList()) {
                 if (req.url.equals(url)) {
                     req.setFinished();
-                    mAdapterObservable.notify(ElationDebugNetworkFragment.class, req);
+                    mElationEventObservable.notify(ElationDebugNetworkFragment.class.getName(), req);
                 }
             }
         }
@@ -55,20 +55,25 @@ public class ElationWebView extends WebView {
 
         private void addElationEvent(ElationEvent event) {
             eventStore.getElationEventsList().add(event);
-            mAdapterObservable.notify(ElationDebugEventsFragment.class, event);
+            mElationEventObservable.notify(ElationDebugEventsFragment.class.getName(), event);
         }
 
         private void addNetworkRequest(NetworkRequest req) {
             eventStore.getNetworkRequestList().add(req);
-            mAdapterObservable.notify(ElationDebugNetworkFragment.class, req);
+            mElationEventObservable.notify(ElationDebugNetworkFragment.class.getName(), req);
         }
     }
 
+    /*
+     * Note: This callback runs asynchronously, so we should always explicitly run code from
+     * event handlers which interact with UI components or data on the UI thread
+     */
     private class ElationWebViewJsInterface {
-        // TODO - providing a native interface could provide us with a more efficient way of passing events
         @JavascriptInterface
-        public String bridgeEvent(String event) {
-            return false;
+        public ElationEvent bridgeEvent(String rawEvent) {
+            ElationEvent event = new ElationEvent(rawEvent);
+            webViewClient.addElationEvent(event);
+            return event;
         }
     }
 
@@ -101,7 +106,7 @@ public class ElationWebView extends WebView {
 
         public void addConsoleMessage(ConsoleMessage msg) {
             eventStore.getConsoleMessages().add(msg);
-            mAdapterObservable.notify(ElationDebugConsoleFragment.class, msg);
+            mElationEventObservable.notify(ElationDebugConsoleFragment.class.getName(), msg);
         }
     }
 
@@ -126,8 +131,8 @@ public class ElationWebView extends WebView {
         // Register native JS interface
         this.addJavascriptInterface(new ElationWebViewJsInterface(), "elationNative");
 
-        // Get new instance of AdapterObservable
-        mAdapterObservable = AdapterObservable.newInstance();
+        // Get new instance of ElationEventObservable
+        mElationEventObservable = ElationEventObservable.newInstance();
     }
 
     public void setProgressBar(ProgressBar tProgress) {
