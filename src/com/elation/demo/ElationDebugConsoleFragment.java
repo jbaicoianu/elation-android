@@ -39,7 +39,9 @@ public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment
             consoleEntries.addAll(eventStore.getConsoleMessages());
             consoleListAdapter = new ElationDebugConsoleMessageAdapter(getActivity(), R.layout.debug_console_message, consoleEntries);
         }
-        webview.mElationEventObservable.register(ElationDebugConsoleFragment.class.getName(), this);
+        //Register for events with this class's name
+        webview.getElationEventManager().register(this, this);
+
         if (consoleList != null) {
             consoleList.setAdapter(consoleListAdapter);
         }
@@ -60,7 +62,7 @@ public class ElationDebugConsoleFragment extends android.support.v4.app.Fragment
 
     @Override
     public void onDestroyView() {
-        webview.mElationEventObservable.unregister(ElationDebugConsoleFragment.class.getName(), this);
+        webview.getElationEventManager().unregister(this, this);
         super.onPause();
     }
 

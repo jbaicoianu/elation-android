@@ -7,8 +7,13 @@ import android.webkit.*;
 import android.widget.ProgressBar;
 
 public class ElationWebView extends WebView {
-    protected ElationEventObservable mElationEventObservable;
+    private ElationEventManager mElationEventManager;
     protected EventStore eventStore;
+
+    public ElationEventManager getElationEventManager(){
+        return mElationEventManager;
+    }
+
 
     private class ElationWebViewClient extends WebViewClient {
         private boolean first = true;
@@ -37,7 +42,7 @@ public class ElationWebView extends WebView {
             for (NetworkRequest req : eventStore.getNetworkRequestPendingList()) {
                 if (req.url.equals(url)) {
                     req.setFinished();
-                    mElationEventObservable.notify(ElationDebugNetworkFragment.class.getName(), req);
+                    mElationEventManager.notify(ElationDebugNetworkFragment.class.getName(), req);
                 }
             }
         }
@@ -55,12 +60,12 @@ public class ElationWebView extends WebView {
 
         private void addElationEvent(ElationEvent event) {
             eventStore.getElationEventsList().add(event);
-            mElationEventObservable.notify(ElationDebugEventsFragment.class.getName(), event);
+            mElationEventManager.notify(ElationDebugEventsFragment.class.getName(), event);
         }
 
         private void addNetworkRequest(NetworkRequest req) {
             eventStore.getNetworkRequestList().add(req);
-            mElationEventObservable.notify(ElationDebugNetworkFragment.class.getName(), req);
+            mElationEventManager.notify(ElationDebugNetworkFragment.class.getName(), req);
         }
     }
 
@@ -106,7 +111,7 @@ public class ElationWebView extends WebView {
 
         public void addConsoleMessage(ConsoleMessage msg) {
             eventStore.getConsoleMessages().add(msg);
-            mElationEventObservable.notify(ElationDebugConsoleFragment.class.getName(), msg);
+            mElationEventManager.notify(ElationDebugConsoleFragment.class.getName(), msg);
         }
     }
 
@@ -131,8 +136,8 @@ public class ElationWebView extends WebView {
         // Register native JS interface
         this.addJavascriptInterface(new ElationWebViewJsInterface(), "elationNative");
 
-        // Get new instance of ElationEventObservable
-        mElationEventObservable = ElationEventObservable.newInstance();
+        // Get new instance of ElationEventManager
+        mElationEventManager = ElationEventManager.newInstance();
     }
 
     public void setProgressBar(ProgressBar tProgress) {

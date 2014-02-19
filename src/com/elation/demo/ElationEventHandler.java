@@ -9,6 +9,9 @@ import java.util.Observer;
 public class ElationEventHandler implements Observer {
     @Override
     public void update(Observable observable, Object data) {
+        /*
+         *  Simply cast the Observable interface's data as an ElationEvent
+         */
         ElationEvent event = (ElationEvent) data;
         if (event.type.equals("myEvent")) {
             // DO SOMETHING
@@ -23,18 +26,18 @@ public class ElationEventHandler implements Observer {
     }
 
     public ElationEventHandler() {
-        ElationEventObservable observable = ElationEventObservable.newInstance();
-        observable.register("myEvent", this);
-        observable.register("myOtherEvent", this);
-        observable.register("yetAnotherEvent", this);
+        ElationEventManager manager = ElationEventManager.newInstance();
+        manager.register("myEvent", this);
+        manager.register("myOtherEvent", this);
+        manager.register("yetAnotherEvent", this);
     }
 
     @Override
     protected void finalize() throws Throwable {
-        ElationEventObservable observable = ElationEventObservable.newInstance();
-        observable.unregister("myEvent", this);
-        observable.unregister("myOtherEvent", this);
-        observable.unregister("yetAnotherEvent", this);
+        ElationEventManager manager = ElationEventManager.newInstance();
+        manager.unregister("myEvent", this);
+        manager.unregister("myOtherEvent", this);
+        manager.unregister("yetAnotherEvent", this);
         super.finalize();
     }
 }

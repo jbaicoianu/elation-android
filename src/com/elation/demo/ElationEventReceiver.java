@@ -13,7 +13,7 @@ class ElationEventReceiver extends Service {
     public static BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ElationEvent event = ElationEventObservable.eventFromIntent(intent);
+            ElationEvent event = ElationEventManager.eventFromIntent(intent);
             if (event.type.equals("myEvent")){
                 //DO STUFF
             }
@@ -22,7 +22,7 @@ class ElationEventReceiver extends Service {
 
     @Override
     public void onCreate() {
-        ElationEventObservable.registerElationEventReceiver(this, receiver, "myEvent");
+        ElationEventManager.registerElationEventReceiver(this, receiver, "myEvent");
         super.onCreate();
     }
 

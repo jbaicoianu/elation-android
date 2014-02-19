@@ -15,17 +15,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides classes implementing the Observer interface with methods to register/deregister/notify
  * for events by name
  */
-public class ElationEventObservable {
+public class ElationEventManager {
     public static final String COM_ELATION_EVENT = "com.elation.event.";
-    private static com.elation.demo.ElationEventObservable _elationEventObservable;
+    private static ElationEventManager _elationEventManager;
     private ConcurrentHashMap<String, Observable> mObservables;
 
-    public static com.elation.demo.ElationEventObservable newInstance() {
-        if (_elationEventObservable == null) {
-            _elationEventObservable = new com.elation.demo.ElationEventObservable();
-            _elationEventObservable.mObservables = new ConcurrentHashMap<String, Observable>();
+    public static ElationEventManager newInstance() {
+        if (_elationEventManager == null) {
+            _elationEventManager = new ElationEventManager();
+            _elationEventManager.mObservables = new ConcurrentHashMap<String, Observable>();
         }
-        return _elationEventObservable;
+        return _elationEventManager;
     }
 
     /*
@@ -71,6 +71,10 @@ public class ElationEventObservable {
         context.registerReceiver(receiver, new IntentFilter(COM_ELATION_EVENT + event));
     }
 
+    public void register(Object object, Observer observer) {
+        register(object.getClass().getName(), observer);
+    }
+
     public void register(String key, Observer observer) {
         Observable observable;
         if (mObservables.containsKey(key)) {
@@ -87,6 +91,10 @@ public class ElationEventObservable {
         Log.d(this.getClass().getName(), "Observables:" + mObservables.size());
     }
 
+    public boolean unregister(Object object, Observer observer) {
+        return unregister(object.getClass().getName(), observer);
+    }
+
     public boolean unregister(String key, Observer observer) {
         if (mObservables.containsKey(key)) {
             mObservables.get(key).deleteObserver(observer);
@@ -98,8 +106,6 @@ public class ElationEventObservable {
 
     /*
      * notifyObservers() == notifyObservers(null)
-     *
-     * Overloading, for great justice
      */
     public boolean notify(String key) {
         return notify(key, null);
