@@ -37,14 +37,14 @@ public class ElationDebugEventsFragment extends android.support.v4.app.Fragment 
             events.addAll(eventStore.getElationEventsList());
             eventsListAdapter = new ElationDebugEventsAdapter(getActivity(),R.layout.debug_events_message, events);
         }
-        webview.mAdapterObservable.register(this);
+        webview.getElationEventManager().register(this, this);
         eventsList.setAdapter(eventsListAdapter);
         return view;
     }
 
     @Override
-    public void onPause() {
-        webview.mAdapterObservable.unregister(this);
+    public void onDestroyView() {
+        webview.getElationEventManager().unregister(this, this);
         super.onPause();
     }
 

@@ -33,15 +33,15 @@ public class ElationDebugNetworkFragment extends android.support.v4.app.Fragment
             networkEntries.addAll(eventStore.getNetworkRequestList());
             networkListAdapter = new ElationDebugNetworkAdapter(getActivity(), R.layout.debug_network_message, networkEntries);
         }
-        webview.mAdapterObservable.register(this);
+        webview.getElationEventManager().register(this, this);
         networkList.setAdapter(networkListAdapter);
 
         return view;
     }
 
     @Override
-    public void onPause() {
-        webview.mAdapterObservable.unregister(this);
+    public void onDestroyView() {
+        webview.getElationEventManager().unregister(this, this);
         super.onPause();
     }
 
